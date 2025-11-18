@@ -11,16 +11,12 @@ Model name is converted to lowercase for the collection name:
 - BlogPost -> "blogs" collection
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, EmailStr
+from typing import Optional, List
 
-# Example schemas (replace with your own):
+# Example schemas (kept for reference):
 
 class User(BaseModel):
-    """
-    Users collection schema
-    Collection name: "user" (lowercase of class name)
-    """
     name: str = Field(..., description="Full name")
     email: str = Field(..., description="Email address")
     address: str = Field(..., description="Address")
@@ -28,21 +24,30 @@ class User(BaseModel):
     is_active: bool = Field(True, description="Whether user is active")
 
 class Product(BaseModel):
-    """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
-    """
     title: str = Field(..., description="Product title")
     description: Optional[str] = Field(None, description="Product description")
     price: float = Field(..., ge=0, description="Price in dollars")
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
+# Application schemas
 # --------------------------------------------------
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class InquiryFile(BaseModel):
+    filename: str
+    content_type: Optional[str] = None
+    size: Optional[int] = None
+
+class Inquiry(BaseModel):
+    """
+    Collection name: "inquiry"
+    Represents a contact/inquiry from the website with optional file uploads.
+    """
+    name: str = Field(..., description="Name des Anfragenden")
+    email: EmailStr = Field(..., description="E-Mail-Adresse")
+    phone: str = Field(..., description="Telefonnummer")
+    zip_city: str = Field(..., description="Postleitzahl / Ort des Bauvorhabens")
+    project_type: str = Field(..., description="Art des Vorhabens")
+    description: str = Field(..., description="Kurzbeschreibung des Bauvorhabens")
+    files: List[InquiryFile] = Field(default_factory=list, description="Hochgeladene Dateien (Metadaten)")
+    source: Optional[str] = Field(None, description="Quelle der Anfrage, z. B. Website-Seite")
